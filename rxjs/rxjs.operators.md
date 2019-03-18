@@ -117,9 +117,319 @@ emitter.emit('msg', 'end');
 ```
 ### 11. ajax
 ### 12. repeatWhen
-### 13. repeatWhen
+```
+const notifier = () => {
+  return Observable.interval(1000);
+};
+
+const source$ = Observable.of(1, 2, 3);
+const repeated$ = source$.repeatWhen(notifier);
+// 每隔一秒，重复订阅
+```
+```
+const notifier = (notification$) => {
+  return notification$.delay(2000);
+};
+
+const repeated$ = source$.repeatWhen(notifier);
+// 每当repeatWhen上游完结的时候，这个notificaton$就会吐出一个数据。
+```
+### 13. defer
+```
+const observableFactory = () => Observable.of(1, 2, 3);
+const source$ = Observable.defer(observableFactory);
+// 被订阅时才创建Observable
+```
 ## 1.2 转化类
+### 1. map
+```
+@param1 {fn} 
+@param2 {string} context fn的this指向
+const source$ = Observable.of(3, 1, 4);
+const mapFunc = function(value, index) {
+  return `${value} ${this.separator} ${index}`;
+};
+const context = {separator: ':'};
+const result$ = source$.map(mapFunc, context);
+result$.subscribe(
+  console.log,
+  null,
+  () => console.log('complete')
+);
+```
+```
+const source$ = Observable.of(3, 1, 4);
+const context = {separator: ':'};
+const mapFunc = (function (separator) {
+  return function(value, index) {
+    return `${value} ${separator} ${index}`;
+  };
+})(context.separator)
+const result$ = source$.map(mapFunc);
+```
+### 2. mapTo
+映射为同一数据
+```
+const result$ = source$.mapTo('A');
+```
+### 3. pluck
+指定多个参数，map(x => x.xx),优点: 自动处理字段不存在的情况
+```
+const source$ = Observable.of(
+  {name: 'RxJS', version: 'v4'},
+  {name: 'React', version: 'v15'},
+  {name: 'React', version: 'v16'},
+  {name: 'RxJS', version: 'v5'}
+);
+const result$ = source$.pluck('name');
+result$.subscribe(
+  console.log,
+  null,
+  () => console.log('complete')
+);
+```
+### 4. windowTime和bufferTime
+1. windowTime: 高阶Observable
+```
+@param1 {number} 持续时间
+@param2 {number} 开始的时间间隔
+@param2 {number} 数据个数
+const source$ = Observable.timer(0, 100);
+const result$ = source$.windowTime(400);
+// const result$ = source$.windowTime(400, 200);
+// 0,1,2,3 => 2,3,4,5
+```
+2. bufferTime: 产生数组的Observable
+```
+const result$ = source$.bufferTime(400);
+```
+### 5. windowCount和bufferCount
+1. windowCount: 高阶Observable
+```
+@param1 {number} 计数的个数
+@param2 {number} 计数的区间
+```
+2. bufferCount
+### 6. windowWhen和bufferWhen
+```
+const source$ = Observable.timer(0, 100);
+const closingSelector = () => {
+  return Observable.timer(400);
+};
+const result$ = source$.windowWhen(closingSelector);
+// closingSelector产生数据时，退订并重新订阅上游
+const closingSelector = () => {
+  return Observable.fromEvent(document.querySelector("#click", "click"));
+};
+```
+### 7. windowToggle和bufferToggle
+```
+const source$ = Observable.timer(0, 100);
+const openings$ = Observable.timer(0, 400);
+const closingSelector = value => {
+  // value为openings$传递的数据
+  return value % 2 === 0 ? Observable.timer(200) : Observable.timer(100);
+};
+const result$ = source$.windowToggle(openings$, closingSelector);
+// 控制开启和关闭，
+```
+### 7. window和buffer
+控制开关
+```
+const source$ = Observable.timer(0, 100);
+const notifer$ = Observable.timer(400, 400);
+const result$ = source$.window(notifer$);
+```
+### 8. 高阶map
+参数为返回Observable的函数，可以看成是处理异步的一种方式，$source开启一个Observable，然后高阶map操作符将Observable抚平，返回Observable。
+```
+const project = (value, index) => {
+    return Observable.interval(100).take(5);
+}
+```
+1. concatMap
+拖拽
+// source$将产生的数据传入project, project返回Observable产生数据，然后由concatMaP合并，数据指project产生的数据
+// 而source$可以认为是开启一个新的Observable
+```
+const source$ = Observable.interval(200);
+const result$ = source$.concatMap(project);
+```
+2. mergeMap
+处理Ajax请求
+```
+const sendButton = document.querySelector('#send');
+Rx.Observable.fromEvent(sendButton, 'click').mergeMap(() => {
+  return Rx.Observable.ajax(apiUrl);
+}).subscribe(result => {
+   // 正常处理AJAX返回的结果
+});
+```
+3. switchMap
+新产生Observable，退订之前的Observable
+4. exhaustMap
+先产生的Observable的优先级总是最高
+### 9. 高阶MapTo
+参数为Observable对象
+1. concat / merge / switch 
+### 10. expand
+所有expand传递给下游的数据，同时也会传递给自己，就像是逐层“展开”所有的数据。
+### 11. 数据分组
+将一个Observable拆分成多个Observable
+1. groupBy
+```
+const intervalStream$ = Observable.interval(1000);
+const groupByStream$ = intervalStream$.groupBy(
+   x => x % 2
+);
+```
+2. partition
+```
+const source$ = Observable.timer(0, 100);
+const [even$, odd$] = source$.partition(x => x % 2 === 0);
+
+even$.subscribe(value => console.log('even:', value));
+odd$.subscribe(value => console.log('odd:', value));
+```
+### 12. 累计数据
+1. scan
+维持状态
+```
+const source$ = Observable.interval(100);
+const result$ = source$.scan((accumulation, value) => {
+  return accumulation + value;
+});
+```
 ## 1.3 过滤类
+实例类
+### 1. filter
+### 2. first
+```
+@params1 {fn} 判别式
+@params2 {fn} 结果选择器，例如 (value, index) => [value, index]
+@params3 {any} 默认值, 若上游完结但无满足判别式的值
+```
+### 3. last
+@params 与first 相同
+### 4. take
+1. take: 从上游拿n个数据 ```result$ = source$.take(n)```
+2. takeLast: 上游完结时，取最后的n个数据
+3. takeWhile: 
+```
+@params {fn} 判别式
+let i = 0
+while(boo) {
+  i++
+}
+take(i)
+``` 
+4. takeUntil 
+控制上游开关的关闭
+```
+const source$ = Observable.interval(1000);
+const notifier$ = Observable.timer(2500);
+const takeUntil$ = source$.takeUntil(notifier$); // 2.5S后关闭开关
+```
+```
+const source$ = Observable.interval(1000);
+const notifier$ = Observable.throw('custom error');
+const takeUntil$ = source$.takeUntil(notifier$);  // 出错后关闭开关
+```
+### 5. skip
+1.skop: 跳过N个之后全拿 ```const skip$ = source$.skip(3)```
+2. skipWhile: 跳过第一个满足条件之前的所有数据 
+```
+@params {fn} 判别式
+const source$ = Observable.interval(1000);
+const skipWhile$ = source$.skipWhile(value => value % 2 === 0);
+```
+3. skipUntil
+控制上游开关的开启
+### 6. throttleTime和debounceTime
+上游控制开关
+1. throttleTime: 在限制时间内，只有一个数据通过
+```
+const source$ = Observable.interval(1000);
+const result$ = source$.throttleTime(2000);
+```
+2. debounceTime: 在限制时间内，只有一个数据产生，则通过.否则，重新订阅上游。
+```
+const source$ = Observable.interval(1000);
+const result$ = source$.debounceTime(2000);
+// 无数据通过
+```
+### 7. throttle和debounce
+```
+const source$ = Observable.interval(1000);
+const durationSelector = value => {
+   return Observable.timer(value % 3 === 0 ? 2000 : 1000);
+};
+const result$ = source$.throttle(durationSelector);
+// 0, 2, 3, 5, 6
+```
+```
+const source$ = Observable.interval(1000);
+const durationSelector = value => {
+   return Observable.timer(value % 3 === 0 ? 2000 : 1000);
+};
+const result$ = source$.debounce(durationSelector);
+// 1, 2, 4, 5
+```
+### 8. auditTime和audit
+与throttle相似，只是把最后一个数据传给下游。若为满足条件上游就完结，则传递完结信号。
+### 9. sampleTime和sample
+与audit相似，只是由下游控制开关
+```
+const notifer$ = Rx.Observable.fromEvent(document.querySelector('#sample'), 'click');
+const tick$ = Rx.Observable.timer(0, 10).map(x => x*10);
+const sample$ = tick$.sample(notifer$);
+sample$.subscribe(value => {
+  document.querySelector('#text').innerText = value
+});
+```
+### 10. distinct
+不同，只返回没出现过的数据。
+```
+@params {fn} 指定
+@params {Observable} 产生数据就清空数据集
+const source$ = Observable.of(
+  {name: 'RxJS', version: 'v4'},
+  {name: 'React', version: 'v15'},
+  {name: 'React', version: 'v16'},
+  {name: 'RxJS', version: 'v5'}
+);
+const distinct$ = source$.distinct(x => x.name);
+
+const source$ = Observable.interval(100).map(x => x % 1000);
+const distinct$ = source$.distinct(null, Observable.interval(500));
+```
+### 11. distinctUntilChanged
+与上一个数据比较
+```
+@params {fn} 比较
+const source$ = Observable.of(
+  {name: 'RxJS', version: 'v4'},
+  {name: 'React', version: 'v15'},
+  {name: 'React', version: 'v16'},
+  {name: 'RxJS', version: 'v5'}
+);
+const compare = (a, b) => a.name === b.name;
+const distinct$ = source$.distinctUntilChanged(compare);
+```
+### 12. distinctUntilKeyChanged
+11的简化写法
+···
+const distinct$ = source$.distinctUntilKeyChanged('name');
+···
+### 12.其他
+1. ignoreElement: 忽略数据，只关心error与complete
+2. elementAt: 把上游数据当数组，只获取指定下标的那一个数据
+```
+@param2 {any} 默认数据
+const source$ = Observable.of(3, 1, 2);
+const result$ = source$.elementAt(3, null);
+```
+3. single 检查上游是否只有一个满足条件的数据 true => data; false => error
 ## 1.4 合并类
 ### 1. concat
 首尾相连,必须等前一个Observable完结，后一个才能登场。
