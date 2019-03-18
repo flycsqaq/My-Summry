@@ -3,6 +3,8 @@
 1. [操作符学习](./rxjs/rxjs.operators.md)
 2. [源码学习](./rxjs/rxjs.md)
 
+## 其他
+1. [programming and philosophy](./others/philosophy.md)
 
 ## 1. 3月总结
 

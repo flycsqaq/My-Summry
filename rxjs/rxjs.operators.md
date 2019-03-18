@@ -39,7 +39,7 @@ const source$ = Observable.empty();
 const source$ = Observable.throw(new Error('Oops'));
 const source$ = Observable.never();
 ```
-### 6. intervale / timer(cold)
+### 6. interval / timer(cold)
 setInterval / setTimeout
 ```
 const source$ = Observable.interval(1000);
@@ -336,7 +336,7 @@ const notifier$ = Observable.throw('custom error');
 const takeUntil$ = source$.takeUntil(notifier$);  // 出错后关闭开关
 ```
 ### 5. skip
-1.skop: 跳过N个之后全拿 ```const skip$ = source$.skip(3)```
+1. skop: 跳过N个之后全拿 ```const skip$ = source$.skip(3)```
 2. skipWhile: 跳过第一个满足条件之前的所有数据 
 ```
 @params {fn} 判别式
@@ -596,3 +596,28 @@ const result$ = ho$.exhaust();
 # 3. 静态和实例分类
 ## 3.1 静态
 ## 3.2 实例
+
+# 4 创建Hot操作符
+## 1. 封装一个makeHot
+```
+Observable.prototype.makeHot = function () {
+  const cold$ = this
+  const subject = new Subject()
+  $cold$.subscribe(subject)
+  return Observable.create(observer => subject.subscribe(observer))
+}
+```
+## 2. multicast
+```
+const hotSource$ = coldSource$.multicast(new Subject());
+```
+## 3. publish
+```
+const tick$ = Observable.interval(1000).take(3);
+const sharedTick$ = tick$.publish().refCount();
+// refCount 计数
+```
+### share
+```
+tick$.share() === tick$.publish().refCount();
+```
