@@ -6,6 +6,7 @@
 
 ## 其他
 1. [programming and philosophy(未完)](./others/philosophy.md)
+2. [态度](./others/attitude.md)
 
 ## 1. 3月总结
 
