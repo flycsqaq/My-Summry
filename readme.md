@@ -1,10 +1,11 @@
-我自学的总结
+自学总结
 ## rxjs
 1. [操作符学习](./rxjs/rxjs.operators.md)
-2. [源码学习](./rxjs/rxjs.md)
+2. [操作符总结(未完)](./rxjs/rxjs.summary.operators.md)
+3. [源码学习(未完)](./rxjs/rxjs.md)
 
 ## 其他
-1. [programming and philosophy](./others/philosophy.md)
+1. [programming and philosophy(未完)](./others/philosophy.md)
 
 ## 1. 3月总结
 
@@ -24,4 +25,5 @@
 ### 1.4 angular
 1. [Angular学习](./March/angular.md)
 
-### 1.5 Rxjs(待补)
+### 1.5 Vue
+1. [Vue-Angular(未完)](./March/vue-angular.md)
