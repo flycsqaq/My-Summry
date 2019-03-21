@@ -1,4 +1,6 @@
 自学总结
+[从subscribe出发窥探Observable与Observer](./rxjs/subscribe.md)
+
 ## rxjs
 1. [操作符学习](./rxjs/rxjs.operators.md)
 2. [操作符总结(未完)](./rxjs/rxjs.summary.operator.md)
