@@ -110,7 +110,7 @@ const source$ = new Observable(observer)
 
 ### 2.2 婴儿期的Observable与Observer
 [rough Observable](https://jsbin.com/jifulezoto/3/edit?js,console)
-因篇幅所限，下面仅展示next方法。都缺少参数检验以及错误处理。
+因篇幅所限，下面仅展示next方法。都缺少参数检验以及错误处理。subscribe是连接Observable与Observer的桥梁。
 ```
 class Observable {
   constructor(_subscribe) {

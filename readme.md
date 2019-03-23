@@ -9,7 +9,7 @@
 ## 其他
 1. [programming and philosophy(未完)](./others/philosophy.md)
 2. [态度](./others/attitude.md)
-
+3. [lax.js介绍](./others/lax.md)
 ## 1. 3月总结
 
 ### 1.1 html
