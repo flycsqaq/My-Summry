@@ -1,6 +1,18 @@
 自学总结
+## May Summary
+1. [Vue小结](./May/vue.md)
+2. [JS API](./May/dataType.md)
+3. [BOM对象API](./May/BOM.md)
+4. [内存管理、作用域、闭包](./May/closure.md)
+5. [浏览器渲染引擎](./May/browser/md)
+6. [服务端业务](./May/server.md)
+7. [懒加载](./May/lazy/md)
 
-[从subscribe出发窥探Observable与Observer](./rxjs/subscribe.md)
+### todolist
+1. HTTP [x]
+2. CSS [x]
+3. HTML [x]
+4. 项目总结 [x]
 
 ## rxjs
 1. [操作符学习](./rxjs/rxjs.operators.md)
